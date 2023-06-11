@@ -22,9 +22,10 @@ def before_request():
 def login():
     if request.method=='POST':
         # 登录操作
-        session.pop('user_id',None)
         username=request.form.get('username',None)
         password=request.form.get('password',None)
+        print(username,password)
+        print(request.form)
         #连接数据库
         db=pymysql.connect(
             host='localhost',
@@ -56,4 +57,4 @@ def profile():
     return render_template('profile.html')
 
 if __name__ == '__main__':
-    app.run('0.0.0.0', port=80, debug=True)
+    app.run('0.0.0.0', port=8080, debug=True)
