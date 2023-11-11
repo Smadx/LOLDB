@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>League of Legends Database</title>
+        <meta charset="UTF-8">
+        <link rel="stylesheet" href="https://unpkg.com/element-ui/lib/theme-chalk/index.css">
+        <style>
+            .el-header, .el-footer {
+                background-color: #B3C0D1;
+                color: #333;
+                text-align: center;
+                line-height: 60px;
+            }
+            .el-main {
+                background-color: #E9EEF3;
+                color: #333;
+                text-align: center;
+                line-height: 580px;
+            }
+        </style>
+    </head>
+    <body>
+        <script src="../static/js/vue.js"></script>
+        <script src="https://unpkg.com/element-ui/lib/index.js"></script>
+        <div id="app">
+            <el-container>
+                <el-header>
+                    LOL英雄-皮肤数据库系统-管理员
+                </el-header>
+                <el-main>
+                    <el-form ref="form" :model="formData" label-width="120px">
+                        <el-form-item label="管理英雄"></el-form-item>
+                        <el-form-item label="要增加的英雄名">
+                          <el-input v-model="formData.addheroName"></el-input>
+                        </el-form-item>
+                        <el-form-item>
+                          <el-button type="primary" @click="addHero">增加</el-button>
+                        </el-form-item>
+                        <el-form-item label="要修改的英雄名">
+                            <el-input v-model="formData.prev_Heroname"></el-input>
+                        </el-form-item>
+                        <el-form-item label="改为">
+                            <el-input v-model="formData.update_heroName"></el-input>
+                        </el-form-item>
+                        <el-form-item>
+                            <el-button type="primary" @click="updateHero">修改</el-button>
+                        </el-form-item>
+                        <el-form-item label="要删除的英雄名">
+                            <el-input v-model="formData.delete_heroName"></el-input>
+                        </el-form-item>
+                        <el-form-item>
+                            <el-button type="primary" @click="deleteHero">删除</el-button>
+                        </el-form-item>
+                      </el-form>
+                        
+                        <el-form ref="form" :model="formData" label-width="120px">
+                            <el-form-item label="管理用户"></el-form-item>
+                            <el-form-item label="修改用户的权限:用户名">
+                                <el-input v-model="formData.per_username"></el-input>
+                            </el-form-item>
+                            <el-form-item label="修改用户的权限:权限">
+                                <el-input v-model="formData.per_permission"></el-input>
+                            </el-form-item>
+                            <el-form-item>
+                                <el-button type="primary" @click="updatepermission">修改</el-button>
+                            </el-form-item>
+                            <el-form-item label="修改用户的密码:用户名">
+                                <el-input v-model="formData.pass_username"></el-input>
+                            </el-form-item>
+                            <el-form-item label="新密码">
+                                <el-input v-model="formData.pass_password"></el-input>
+                            </el-form-item>
+                            <el-form-item>
+                                <el-button type="primary" @click="updatepassword">修改</el-button>
+                            </el-form-item>
+                            <el-form-item label="要删除的用户名">
+                                <el-input v-model="formData.delete_username"></el-input>
+                            </el-form-item>
+                            <el-form-item>
+                                <el-button type="primary" @click="deleteuser">删除</el-button>
+                            </el-form-item>
+                        </el-form>
+                </el-main>
+                <el-footer>
+                    LOL英雄-皮肤数据库系统-管理员
+                </el-footer>
+            </el-container>
+        </div>
+        <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+        <script>
+            new Vue({
+                el: "#app",
+                data() {
+                    return {
+                        formData: {
+                            addheroName: '',
+                            prev_Heroname: '',
+                            update_heroName: '',
+                            delete_heroName: '',
+                            per_username: '',
+                            per_permission: '',
+                            pass_username: '',
+                            pass_password: '',
+                            delete_username: ''
+                        }
+                    };
+                },
+                methods: {
+                    addHero() {
+                        const formData = new FormData();
+                        formData.append('heroName', this.formData.addheroName);
+                        axios.post('/api/add/heroes', formData)
+                        .then(response => {
+                            // 处理成功响应
+                            this.success();
+                        })
+                        .catch(error => {
+                            // 处理错误响应
+                            this.fail();
+                        });
+                    },
+                    updateHero() {
+                        const formData = new FormData();
+                        formData.append('prevHeroName', this.formData.prev_Heroname);
+                        formData.append('updateHeroName', this.formData.update_heroName);
+                        // 使用Axios发送HTTP请求，向服务器更新英雄信息
+                        axios.post('/api/update/heroes', formData)
+                        .then(response => {
+                            // 处理成功响应
+                            this.success();
+                        })
+                        .catch(error => {
+                            // 处理错误响应
+                            this.fail();
+                        });
+                    },
+                    deleteHero() {
+                        const formData = new FormData();
+                        formData.append('heroName', this.formData.delete_heroName);
+                        // 使用Axios发送HTTP请求，向服务器删除指定英雄
+                        axios.post('/api/delete/heroes', formData)
+                        .then(response => {
+                            // 处理成功响应
+                            this.success();
+                        })
+                        .catch(error => {
+                            // 处理错误响应
+                            this.fail();
+                        });
+                    },
+                    updatepermission() {
+                        const formData = new FormData();
+                        formData.append('username', this.formData.per_username);
+                        formData.append('permission', this.formData.per_permission);
+                        // 使用Axios发送HTTP请求，向服务器更新用户权限
+                        axios.post('/api/update/permission', formData)
+                        .then(response => {
+                            // 处理成功响应
+                            this.success();
+                        })
+                        .catch(error => {
+                            // 处理错误响应
+                            this.fail();
+                        });
+                    },
+                    updatepassword() {
+                        const formData = new FormData();
+                        formData.append('username', this.formData.pass_username);
+                        formData.append('password', this.formData.pass_password);
+                        // 使用Axios发送HTTP请求，向服务器更新用户密码
+                        axios.post('/api/update/password', formData)
+                        .then(response => {
+                            // 处理成功响应
+                            this.success();
+                        })
+                        .catch(error => {
+                            // 处理错误响应
+                            this.fail();
+                        });
+                    },
+                    deleteuser() {
+                        const formData = new FormData();
+                        formData.append('username', this.formData.delete_username);
+                        // 使用Axios发送HTTP请求，向服务器删除指定用户
+                        axios.post('/api/delete/user', formData)
+                        .then(response => {
+                            // 处理成功响应
+                            this.success();
+                        })
+                        .catch(error => {
+                            // 处理错误响应
+                            this.fail();
+                        });
+                    },
+                    success() {
+                        this.$alert('成功!', '操作结果', {
+                        confirmButtonText: '确定',
+                        callback: action => {
+                            this.$message({
+                                type: 'info',
+                                message: `action: ${ action }`
+                            });
+                        }
+                        });
+                    },
+                    fail() {
+                        this.$alert('失败!', '操作结果', {
+                        confirmButtonText: '确定',
+                        callback: action => {
+                            this.$message({
+                                type: 'info',
+                                message: `action: ${ action }`
+                            });
+                        }
+                        });
+                    }
+                }
+            });
+        </script>
+    </body>
+</html>

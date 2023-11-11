@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>League of Legends Database</title>
+        <meta charset="UTF-8">
+        <link rel="stylesheet" href="https://unpkg.com/element-ui/lib/theme-chalk/index.css">
+        <style>
+            .el-header, .el-footer {
+                background-color: #B3C0D1;
+                color: #333;
+                text-align: center;
+                line-height: 60px;
+            }
+            .el-main {
+                background-color: #E9EEF3;
+                color: #333;
+                text-align: center;
+                line-height: 160px;
+            }
+        </style>
+    </head>
+    <body>
+        <script src="../static/js/vue.js"></script>
+        <script src="https://unpkg.com/element-ui/lib/index.js"></script>
+        <div id="app">
+            <el-container>
+                <el-header>
+                    LOL英雄-皮肤数据库系统-注册
+                </el-header>
+                <el-main>
+                    <el-form :model="ruleForm" status-icon :rules="rules" ref="ruleForm" label-width="100px" class="demo-ruleForm">
+                        <el-form-item label="用户名" prop="name">
+                          <el-input v-model.number="ruleForm.name" placeholder="最大长度为20"></el-input>
+                        </el-form-item>
+                        <el-form-item label="密码" prop="pass">
+                          <el-input type="password" v-model="ruleForm.pass" placeholder="最大长度为20" autocomplete="off"></el-input>
+                        </el-form-item>
+                        <el-form-item label="确认密码" prop="checkPass">
+                          <el-input type="password" v-model="ruleForm.checkPass" autocomplete="off"></el-input>
+                        </el-form-item>
+                        <el-form-item>
+                          <el-button type="primary" @click="submitForm('ruleForm')">注册</el-button>
+                          <el-button @click="resetForm('ruleForm')">返回登录</el-button>
+                        </el-form-item>
+                      </el-form>
+                </el-main>
+            </el-container>
+        </div>
+        <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+        <script>
+            new Vue({
+                el: "#app",
+                data() {
+                    return {
+                        ruleForm: {
+                            name: '',
+                            pass: '',
+                            checkPass: ''
+                        },
+                        rules: {
+                            name: [
+                                { required: true, message: '请输入用户名', trigger: 'blur' }
+                            ],
+                            pass: [
+                                { required: true, message: '请输入密码', trigger: 'blur' }
+                            ],
+                            checkPass: [
+                                { required: true, message: '请再次输入密码', trigger: 'blur' }
+                            ]
+                        }
+                    };
+                },
+                methods: {
+                    submitForm(formName) {
+                        this.$refs[formName].validate(valid => {
+                            if (valid) {
+                                const formData = new FormData();
+                                formData.append('username', this.ruleForm.name);
+                                formData.append('password', this.ruleForm.pass);
+                                if(this.ruleForm.pass!=this.ruleForm.checkPass)
+                                {
+                                    this.fail();
+                                }
+                                else{
+                                    axios.post('/register', formData)
+                                    .then(response => {
+                                        this.success();
+                                    })
+                                    .catch(error => {
+                                        this.fail();
+                                        // 处理错误后的逻辑
+                                    });
+                                }
+                            } else {
+                                console.log('Form validation failed');
+                            }
+                        });
+                    },
+                    success() {
+                        this.$alert('注册成功!请返回登录', '操作结果', {
+                        confirmButtonText: '确定',
+                        callback: action => {
+                            this.$message({
+                                type: 'info',
+                                message: `action: ${ action }`
+                            });
+                        }
+                        });
+                    },
+                    fail() {
+                        this.$alert('注册失败!请检查你的用户名和密码', '操作结果', {
+                        confirmButtonText: '确定',
+                        callback: action => {
+                            this.$message({
+                                type: 'info',
+                                message: `action: ${ action }`
+                            });
+                        }
+                        });
+                    },
+                    resetForm(formName) {
+                        this.$refs[formName].resetFields();
+                        window.location.href = '/login';
+                    }
+                }
+            });
+        </script>
+    </body>
+</html>

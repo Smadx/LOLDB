@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>League of Legends Database</title>
+        <meta charset="UTF-8">
+        <link rel="stylesheet" href="https://unpkg.com/element-ui/lib/theme-chalk/index.css">
+        <style>
+            .el-header, .el-footer {
+                background-color: #B3C0D1;
+                color: #333;
+                text-align: center;
+                line-height: 60px;
+            }
+            .el-main {
+                background-color: #E9EEF3;
+                color: #333;
+                text-align: center;
+                line-height: 160px;
+            }
+        </style>
+    </head>
+    <body>
+        <script src="../static/js/vue.js"></script>
+        <script src="https://unpkg.com/element-ui/lib/index.js"></script>
+        <div id="app">
+            <el-container>
+                <el-header>
+                    LOL英雄-皮肤数据库系统-登录
+                </el-header>
+                <el-main>
+                    <el-form ref="form" :model="form">
+                        <el-form-item label="用户名">
+                            <el-input v-model="form.input1" placeholder="请输入用户名"></el-input>
+                        </el-form-item>
+                        <el-form-item label="密码">
+                            <el-input type="password" v-model="form.input2" placeholder="请输入密码"></el-input>
+                        </el-form-item>
+                    </el-form>
+                </el-main>
+                <el-footer>
+                    <el-button type="primary" @click="onSubmit">登录</el-button>
+                    <el-button type="info" @click="onRegister">注册</el-button>
+                </el-footer>
+            </el-container>
+        </div>
+        <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+        <script>
+            new Vue({
+                el: "#app",
+                data() {
+                    return {
+                        form: {
+                            input1: '',
+                            input2: ''
+                        }
+                    };
+                },
+                methods: {
+                    onSubmit() {
+                        const formData = new URLSearchParams();
+                        formData.append('username', this.form.input1);
+                        formData.append('password', this.form.input2);
+
+                        // console.log(formData)
+
+                        axios.post('/login', formData)
+                            .then(response => {
+                                console.log('POST request success!', response);
+                                window.location.href = response.data.redirect;
+                                // 处理成功后的逻辑
+                            })
+                            .catch(error => {
+                                console.error('POST request error!', error);
+                                // 处理错误后的逻辑
+                            });
+                    },
+                    onRegister() {
+                        window.location.href = '/register';
+                    }
+                }
+            });
+        </script>
+    </body>
+</html>

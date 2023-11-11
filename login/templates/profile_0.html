@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>League of Legends Database</title>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" href="https://unpkg.com/element-ui/lib/theme-chalk/index.css">
+    <style>
+        .el-header, .el-footer {
+            background-color: #111010;
+            color: #bf953f;
+            text-align: center;
+            line-height: 60px;
+        }
+        .el-main {
+            background-color: #283131;
+            color: #13508e;
+            text-align: center;
+            line-height: 100px;
+        }
+        #button-container {
+            width: 280px;
+            height: 700px;
+        }
+        .button-item {
+            background-color: #459bd4;
+            color: #fafbfc;
+            width: 75%;
+            margin-bottom: 10px;
+        }
+        .hero-image {
+            max-width: 300px;
+            max-height: 600px;
+            margin-right: 20px;
+        }
+        .scroll-container {
+            width: 100%;
+            overflow-x: auto;
+        }
+        .skin-buttons {
+            color: #f2edf2;
+            display: flex;
+            justify-content: flex-start;
+            width: 1200px;
+            padding: 10px;
+        }
+        .skin-buttons .el-button {
+            width: 200px;
+            margin-right: 30px;
+        }
+        .audio-card {
+            background-color: #5f5959;
+            height: 500px;
+            width: 700px;
+        }
+        .audio-content {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px;
+        }
+        .audio-item {
+            display: flex;
+            align-items: center;
+            margin-bottom: 10px;
+            height: 150px;
+        }
+        .audio-button {
+            margin-right: 10px;
+        }
+        .audio-label {
+            font-size: 16px;
+        }
+    </style>
+</head>
+<body>
+    <div id="app">
+        <el-container>
+            <el-aside width="250px">
+                <el-select v-model="selectedHero" filterable placeholder="Select a hero" @keyup.enter.native="handleHeroChange">
+                    <el-option v-for="option in options" :key="option.HNO" :label="option.name" :value="option.HNO"></el-option>
+                </el-select>
+                <div id="button-container">
+                    <el-button
+                        v-for="hero in options"
+                        :key="hero.HNO"
+                        class="button-item"
+                        v-text="hero.name"
+                        :type="selectedHero === hero.HNO ? 'primary' : ''"
+                        @click="handleHeroChangeButton(hero.HNO)"
+                    >
+                    </el-button>
+                </div>
+            </el-aside>
+            <el-container>
+                <el-header>
+                    LOL英雄皮肤数据库
+                </el-header>
+                <el-main>
+                    <el-row v-if="selectedHero">
+                        <el-col :span="8">
+                            <el-image :src="selectedSkinImage" alt="Hero Image" class="hero-image"></el-image>
+                        </el-col>
+                        <el-col :span="8">
+                            <el-card class="audio-card" shadow="never">
+                                <div class="audio-content">
+                                  <div class="audio-item">
+                                    <el-button class="audio-button" icon="el-icon-video-play" v-text="'BAN'" @click="playAudio(selectedHeroBanvoice)" size="large" circle></el-button>
+                                    <span class="audio-label" v-text="voice.ban_CONDI"></span>
+                                  </div>
+                                  <div class="audio-item">
+                                    <el-button class="audio-button" icon="el-icon-video-play" v-text="'PICK'" @click="playAudio(selectedHeroPickvoice)" size="large" circle></el-button>
+                                    <span class="audio-label" v-text="voice.pick_CONDI"></span>
+                                  </div>
+                                </div>
+                              </el-card>
+                        </el-col>
+                    </el-row>
+                    <div v-else>
+                        请选择一个英雄
+                    </div>
+                </el-main>
+                <el-footer>
+                    <div class="scroll-container">
+                        <div class="skin-buttons">
+                          <el-button
+                            v-for="skin in selectedHeroSkins"
+                            :key="skin.SNO"
+                            :type="selectedSkin === skin.SNO ? 'primary' : 'text'"
+                            v-text="skin.SNAME"
+                            @click="changeSkin(skin.SNO)"
+                          ></el-button>
+                        </div>
+                      </div>
+                </el-footer>
+            </el-container>
+        </el-container>
+    </div>
+    <script src="../static/js/vue.js"></script>
+    <script src="https://unpkg.com/element-ui/lib/index.js"></script>
+    <script>
+        new Vue({
+            el: "#app",
+            data: {
+                selectedHero: '', // 选择的英雄HNO
+                options: [], // 选项数组
+                selectedHeroSkins: [], // 选中英雄的皮肤列表
+                selectedSkin: '', // 选中的皮肤SNO
+                selectedSkinImage: '' ,// 选中皮肤的图片地址
+                selectedHeroName: '' ,// 选中英雄的名称
+                selectedHeroBanvoice: '', // 选中英雄的Ban语音地址
+                selectedHeroPickvoice: '', // 选中英雄的Pick语音地址
+                voice: {
+                    ban_CONDI: '',
+                    pick_CONDI: ''
+                }
+            },
+            created() {
+                this.fetchHeroes();
+            },
+            methods: {
+                async fetchHeroes() {
+                    try {
+                        const response = await fetch('/api/heroes');
+                        const data = await response.json();
+                        this.options = data;
+                    } catch (error) {
+                        console.error(error);
+                    }
+                },
+                async fetchHeroSkins(heroId) {
+                    try {
+                        const response = await fetch(`/api/skin/${heroId}`);
+                        const data = await response.json();
+                        this.selectedHeroSkins = data.skins;
+                        this.selectedSkin = data.defaultSkin;
+                        this.selectedSkinImage = data.skins.find(skin => skin.SNO === data.defaultSkin).SADDRESS;
+                        this.changeSkin(data.defaultSkin);
+                    } catch (error) {
+                        console.error(error);
+                    }
+                },
+                async fetchHerovoice(heroId) {
+                    try {
+                        const response = await fetch(`/api/voice/${heroId}`);
+                        const data = await response.json();
+                        if (data && data.voices && data.voices.length >= 2) {
+                            const pickVoice = data.voices[0];
+                            const banVoice = data.voices[1];
+                            this.selectedHeroPickvoice = pickVoice.VADDRESS;
+                            this.selectedHeroBanvoice = banVoice.VADDRESS;
+                            this.voice.ban_CONDI=banVoice.CONDI;
+                            this.voice.pick_CONDI=pickVoice.CONDI;
+                        }
+                    } catch (error) {
+                        console.error(error);
+                    }
+                },
+                handleHeroChange() {
+                    const heroName = this.options.find(option => option.HNO === this.selectedHero).name;
+                    this.selectedHeroName = heroName;
+                    this.fetchHeroSkins(this.selectedHero);
+                    this.fetchHerovoice(this.selectedHero);
+                },
+                handleHeroChangeButton(heroHNO) {
+                    this.selectedHero = heroHNO;
+                    const heroName = this.options.find(option => option.HNO === heroHNO).name;
+                    this.selectedHeroName = heroName;
+                    this.fetchHeroSkins(heroHNO);
+                    this.fetchHerovoice(heroHNO);
+                },
+                changeSkin(skinSNO) {
+                    this.selectedSkin = skinSNO;
+                    this.selectedSkinImage = this.selectedHeroSkins.find(skin => skin.SNO === skinSNO).SADDRESS;
+                },
+                playAudio(audioUrl) {
+                    const audio = new Audio(audioUrl);
+                    audio.play();
+                }
+            }
+        })
+    </script>
+</body>
+</html>
