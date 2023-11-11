@@ -1,2 +1,4 @@
 # LOLDB 
-一个用于查询LOL英雄皮肤和语音的网站,截至版本2023年6月
+A website for querying League of Legends champion skins and voice lines, as of June 2023.
+
+Special thanks to ZRX for contributing to the backend server and database aspects of the project
